@@ -2,6 +2,7 @@
 #include "SharedObject.h"
 #include "thread.h"
 #include <string> 
+
 struct MyShared{
 	int sdelay;
 	int sthreadID;

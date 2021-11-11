@@ -2,20 +2,21 @@
 #include "SharedObject.h"
 #include "thread.h"
 #include <string> 
+using namespace std;
 
 struct MyShared{
-	int sdelay;
-	int sthreadID;
-	int sreportID;
-	bool sRunning;
+	int sharedThreadID;
+	int sharedReportID;
+	int sharedDelay;
+	bool sharedRunning;
 };
 
 class WriterThread : public Thread{
 public:
-		int 	delay;
-		int 	threadID;
-		int 	reportID = 1;
-		bool	flag;
+		int delay;
+		int threadID;
+		int reportID = 1;
+		bool flag;
 		
 		WriterThread(int in, int threadid):Thread(8*1000){
 			this->delay = in;
@@ -27,10 +28,10 @@ public:
 			Shared<MyShared> sharedMemory ("sharedMemory");
 			while(true)// Here the memory values of the thread must be updated
 			{
-				sharedMemory->sthreadID = threadID; //sets thread ID
-				sharedMemory->sreportID = reportID; //sets number of reports
+				sharedMemory->sharedThreadID = threadID; //sets thread ID
+				sharedMemory->sharedReportID = reportID; //sets number of reports
+				sharedMemory->sharedDelay = delay;//sets delay
 				reportID ++; //increments the number of reports 
-				sharedMemory->sdelay = delay;//sets delay
 				sleep(delay); //sleeps the thread for the amount of delay set by the user
 				if(flag){
 					break;
@@ -43,36 +44,36 @@ public:
 
 int main(void)
 {
-	std::string  userInput;
-	std::string userDelay;
+	string userInput;
+	string threadDelay;
 	int numThreads=1; //Used for creating writerThread objects where numThreads will be used to give threads ID #s
 
-	std::cout << "I am a Writer" << std::endl;
+	cout << "I am a Writer" << endl;
 	
 	WriterThread * thread; //declare thread 
 
 	Shared<MyShared> shared("sharedMemory", true); //This is the owner of sharedMamory
-	//Set the running value to true so the reader can poll the shared memory
-	shared ->sRunning = true;
 
-	
+	shared ->sharedRunning = true;	//Set the running value to true so the reader can poll the shared memory
+
 	while(true){
-		//Prompt user and get input. 
-		std::cout << "Would you like to create a writer thread? Enter Y or N: "<< std::endl;
-		getline(std::cin,userInput);
-		if(userInput == "Y"){
-			std::cout << "Please enter a delay time for this thread: "<< std::endl;
-			getline(std::cin,userDelay);
-			int delay = atoi(userDelay.c_str()); //Convert the string to and int
+		cout << "Would you like to create a writer thread? Enter yes or no: "<< endl;
+		cin >> userInput;
+		cin.ignore();
+		if(userInput == "yes"){
+			cout << "Please enter a delay time for this thread: "<< endl;
+			cin >> threadDelay;
+			cin.ignore();
+			int delay = atoi(threadDelay.c_str()); //Convert the string to and int
 
 			//Create a new writerThread object 
 			thread = new WriterThread(delay,numThreads);//instantiate thread 
 			numThreads++; //Increase the number of threads 
 		}
-		else if (userInput == "N"){
+		else if (userInput == "no"){
 			//If the user enters N then the while statement will break and threads will be handled 
 			if(numThreads -1 !=0){ //Avoids core dump in the case N is entered first and no threads were created
-				shared->sRunning = false;
+				shared->sharedRunning = false;
 				break;
 			}
 			else{
@@ -82,7 +83,7 @@ int main(void)
 		else
 		{
 			//To handle inproper inputs. 
-			std::cout << "Invalid input entered." << std::endl;
+			cout << "Invalid input entered." << endl;
 		}
 	}//end while 
 	if(numThreads-1 != 0){ //Avoids core dump in the case N is entered first and no threads were created

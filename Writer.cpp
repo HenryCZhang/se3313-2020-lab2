@@ -33,6 +33,7 @@ public:
 				sharedMemory->sharedDelay = delay;//sets delay
 				reportID ++; //increments the number of reports 
 				sleep(delay); //sleeps the thread for the amount of delay set by the user
+				//in case that 'no' is the first input -> break the while loop
 				if(flag){
 					break;
 				}
